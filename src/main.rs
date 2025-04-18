@@ -1,59 +1,67 @@
 use bevy::prelude::*;
 
-#[derive(Component)]
-struct Person;
-
-#[derive(Component)]
-struct Name(String);
-
-fn add_people(mut commands: Commands) {
-    commands.spawn((Person, Name("Elaina Proctor".to_string())));
-    commands.spawn((Person, Name("Renzo Hume".to_string())));
-    commands.spawn((Person, Name("Zayna Nieves".to_string())));
-}
-
-fn greet_people(time: Res<Time>, mut timer: ResMut<GreetTimer>, query: Query<&Name, With<Person>>) {
-    // update our timer with the time elapsed since the last update
-    // if that caused the timer to finish, we say hello to everyone
-    if timer.0.tick(time.delta()).just_finished() {
-        for name in &query {
-            println!("hello {}!", name.0);
-        }
-    }
-}
-
-fn update_people(mut query: Query<&mut Name, With<Person>>) {
-    for mut name in &mut query {
-        if name.0 == "Elaina Proctor" {
-            name.0 = "Elaina Hume".to_string();
-            break; // We don't need to change any other names.
-        }
-    }
-}
-
-#[derive(Resource)]
-struct GreetTimer(Timer);
-
-pub struct HelloPlugin;
-
-impl Plugin for HelloPlugin {
-    fn build(&self, app: &mut App) {
-        // add things to your app here
-        app.insert_resource(
-            GreetTimer(
-                Timer::from_seconds(2.0, TimerMode::Repeating)
-            )
-        );
-        app.add_systems(Startup, add_people);
-        app.add_systems(
-            Update, 
-            (update_people, greet_people).chain());
-    }
-}
-
 fn main() {
     App::new()
-    .add_plugins(DefaultPlugins)
-    .add_plugins(HelloPlugin)
-    .run();
+        .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
+        .add_systems(Startup, setup)
+        .add_systems(Update, animate_sprite)
+        .run();
+}
+
+#[derive(Component)]
+struct AnimationIndices {
+    first: usize,
+    last: usize,
+}
+
+#[derive(Component, Deref, DerefMut)]
+struct AnimationTimer(Timer);
+
+fn animate_sprite(
+    time: Res<Time>,
+    mut query: Query<(&AnimationIndices, &mut AnimationTimer, &mut Sprite)>,
+) {
+    for (indices, mut timer, mut sprite) in &mut query {
+        timer.tick(time.delta());
+
+        if timer.just_finished() {
+            if let Some(atlas) = &mut sprite.texture_atlas {
+                atlas.index = if atlas.index == indices.last {
+                    indices.first
+                } else {
+                    atlas.index + 1
+                };
+            }
+        }
+    }
+}
+
+fn setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+) {
+    let texture = asset_server.load("textures/character/tw.png");
+    let layout = TextureAtlasLayout::from_grid(UVec2::splat(16), 8, 6, None, None);
+    let texture_atlas_layout = texture_atlas_layouts.add(layout);
+
+    let offset: usize = 8;
+    let animation_indices = AnimationIndices {
+        first: 0 + offset,
+        last: 7 + offset,
+    };
+
+    commands.spawn(Camera2d);
+    commands.spawn((
+        Sprite::from_atlas_image(
+            texture,
+            TextureAtlas {
+                layout: texture_atlas_layout,
+                index: animation_indices.first,
+            },
+        ),
+        Transform::from_scale(Vec3::splat(6.0)),
+        animation_indices,
+        AnimationTimer(Timer::from_seconds(1.0, TimerMode::Repeating)),
+    ));
 }
