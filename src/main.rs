@@ -106,6 +106,7 @@ fn setup(
         Transform::from_scale(Vec3::splat(8.0)),
         animation_indices,
         AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
+
         // Player attributes
         Player,
         Motion { velo: Vec2::ZERO },
