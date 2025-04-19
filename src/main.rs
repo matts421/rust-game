@@ -85,8 +85,8 @@ fn setup(
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
-    let texture = asset_server.load("textures/character/tw.png");
-    let layout = TextureAtlasLayout::from_grid(UVec2::splat(16), 6, 8, None, None);
+    let texture = asset_server.load("textures/character/tw-move.png");
+    let layout = TextureAtlasLayout::from_grid(UVec2::splat(16), 6, 4, Some(UVec2{x: 0, y: 1}), None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
     let animation_indices = AnimationIndices { curr: 0, first: 0, last: 5, offset: 0 };
