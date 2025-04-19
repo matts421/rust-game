@@ -1,5 +1,9 @@
 use std::io::{Read, Write};
-use std::net::{TcpListener, TcpStream};
+use std::{thread, time::Duration};
+use std::net::{TcpListener, TcpStream, UdpSocket};
+
+use rust_game::DISCOVERY_PORT;
+use rust_game::ECHO_PORT;
 
 fn handle_client(mut stream: TcpStream) {
     let mut buffer = [0; 512];
@@ -26,9 +30,23 @@ fn handle_client(mut stream: TcpStream) {
     }
 }
 
+fn broadcast(socket: &UdpSocket) -> std::io::Result<()> {
+    let message = format!("ECHO_SERVER:{}", ECHO_PORT);
+    let message_bytes = message.as_bytes();
+
+    loop {
+        socket.send_to(message_bytes, format!("255.255.255.255:{}", DISCOVERY_PORT))?;
+        thread::sleep(Duration::from_secs(2)); // broadcast every 2s
+    }
+    // todo: cancel when received a connection
+}
+
 fn main() -> std::io::Result<()> {
-    let listener = TcpListener::bind("127.0.0.1:7878")?;
-    println!("Server listening on port 7878");
+    let socket = UdpSocket::bind("0.0.0.0:0")?; // any available port
+    socket.set_broadcast(true)?;
+    std::thread::spawn(move || broadcast(&socket));
+
+    let listener = TcpListener::bind(format!("0.0.0.0:{}", ECHO_PORT))?;
 
     for stream in listener.incoming() {
         match stream {
