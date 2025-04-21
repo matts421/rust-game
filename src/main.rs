@@ -1,33 +1,15 @@
 use bevy::prelude::*;
-use bevy::render::settings::{WgpuSettings, RenderCreation, Backends};
-use bevy::render::RenderPlugin;
 use bevy::DefaultPlugins;
+use dotenvy::dotenv;
 
 const PLAYER_SPEED: f32 = 200.0;
 
 fn main() {
-    let wgpu_settings = WgpuSettings {
-        backends: Some(
-            if cfg!(target_os = "windows") {
-                Backends::DX12
-            } else if cfg!(target_os = "macos") {
-                Backends::METAL
-            } else {
-                Backends::VULKAN | Backends::GL
-            }
-        ),
-        ..default()
-    };
+    // To explicitly set a graphics backend, create an .env file with WGPU_BACKEND= dx12 (windows), metal (macos), vulkan (linux)
+    dotenv().ok();
     
     App::new()
-        .add_plugins(
-            DefaultPlugins
-                .set(ImagePlugin::default_nearest())
-                .set(RenderPlugin {
-                    render_creation: RenderCreation::Automatic(wgpu_settings),
-                    synchronous_pipeline_compilation: false,
-                }),
-        )
+        .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .add_systems(Startup, setup)
         .add_systems(
             Update, (
