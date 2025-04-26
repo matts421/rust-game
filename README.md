@@ -7,7 +7,8 @@ WGPU_BACKEND = dx12
 ```
 
 Choices:
-- "vulkan"
-- "metal"
-- "dx12"
-- "gl"
+- "vulkan", "vk"
+- "metal", "mtl"
+- "dx12", "d3d12"
+- "gl", "opengl", "gles"
+- "webgpu"
