@@ -5,3 +5,9 @@ Example:
 ```
 WGPU_BACKEND = dx12
 ```
+
+Choices:
+- "vulkan"
+- "metal"
+- "dx12"
+- "gl"
