@@ -1,4 +1,4 @@
-Add .env file in root of project specifying graphics backend if your computer does not default backends (i.e. Vulkan on Windows/Linux, Metal on macOS).
+Add .env file in root of project specifying graphics backend if your computer does not support default backends (i.e. Vulkan on Windows/Linux, Metal on macOS).
 
 Example:
 
