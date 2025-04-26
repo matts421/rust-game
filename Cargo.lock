@@ -3841,8 +3841,8 @@ name = "rust-game"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "image",
  "dotenvy",
+ "image",
 ]
 
 [[package]]
