@@ -1,8 +1,12 @@
 use bevy::prelude::*;
+use dotenvy::dotenv;
 
 const PLAYER_SPEED: f32 = 300.0;
 
 fn main() {
+    // To explicitly set a graphics backend, create an .env file with WGPU_BACKEND= dx12 (windows), metal (macos), vulkan (linux)
+    dotenv().ok();
+    
     App::new()
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .add_systems(Startup, setup)
