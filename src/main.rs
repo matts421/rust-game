@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use dotenvy::dotenv;
 
-const PLAYER_SPEED: f32 = 200.0;
+const PLAYER_SPEED: f32 = 300.0;
 
 fn main() {
     // To explicitly set a graphics backend, create an .env file with WGPU_BACKEND= dx12 (windows), metal (macos), vulkan (linux)
@@ -90,7 +90,9 @@ fn setup(
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     let texture = asset_server.load("textures/character/tw.png");
-    let layout = TextureAtlasLayout::from_grid(UVec2::splat(16), 6, 8, None, None);
+    let layout = TextureAtlasLayout::from_grid(
+        UVec2::splat(16), 6, 8, Some(UVec2 { x: 0, y: 1 }), None
+    );
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
     let animation_indices = AnimationIndices { curr: 0, first: 0, last: 5, offset: 0 };
@@ -109,7 +111,7 @@ fn setup(
         ),
         Transform::from_scale(Vec3::splat(8.0)),
         animation_indices,
-        AnimationTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
+        AnimationTimer(Timer::from_seconds(0.2, TimerMode::Repeating)),
 
         // Player attributes
         Player,
