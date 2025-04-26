@@ -15,6 +15,7 @@ fn main() {
                 animate_sprite,
                 handle_direction,
                 movement_system,
+                update_camera,
                 quit
             ))
         .run();
@@ -75,6 +76,19 @@ fn movement_system(time: Res<Time>, mut query: Query<(&mut Transform, &Motion)>)
     }
 }
 
+fn update_camera(
+    player_query: Query<&Transform, With<Player>>,
+    mut camera_query: Query<&mut Transform, (With<Camera>, Without<Player>)>,
+) {
+    if let Ok(player_transform) = player_query.get_single() {
+        if let Ok(mut camera_transform) = camera_query.get_single_mut() {
+            let mut new_pos = player_transform.translation;
+            new_pos.z = camera_transform.translation.z;
+            camera_transform.translation = new_pos;
+        }
+    }
+}
+
 fn quit(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut exit: EventWriter<AppExit>
@@ -99,6 +113,15 @@ fn setup(
 
     commands.spawn(Camera2d);
 
+    commands.spawn((
+        Sprite::from_image(asset_server.load("textures/bg.png")),
+        Transform {
+            translation: Vec3 {x: 0.0, y: 0.0 , z: -1.0},
+            rotation: Quat::IDENTITY,
+            scale: Vec3::splat(8.0)
+        }
+    ));
+
     // Create player bundle
     commands.spawn((
         // Sprite attributes
@@ -109,7 +132,11 @@ fn setup(
                 index: animation_indices.curr + animation_indices.offset,
             },
         ),
-        Transform::from_scale(Vec3::splat(8.0)),
+        Transform {
+            translation: Vec3 {x: 0.0, y: 0.0 , z: 0.0},
+            rotation: Quat::IDENTITY,
+            scale: Vec3::splat(8.0)
+        },
         animation_indices,
         AnimationTimer(Timer::from_seconds(0.2, TimerMode::Repeating)),
 
