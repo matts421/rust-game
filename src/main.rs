@@ -1,14 +1,20 @@
+mod map;
+mod constants;
+
 use bevy::prelude::*;
 use dotenvy::dotenv;
+
+use crate::map::MapPlugin;
+use crate::constants::{GAME_SCALE, TILE_SIZE};
 
 const PLAYER_SPEED: f32 = 300.0;
 
 fn main() {
-    // To explicitly set a graphics backend, create an .env file with WGPU_BACKEND= dx12 (windows), metal (macos), vulkan (linux)
     dotenv().ok();
     
     App::new()
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
+        .add_plugins(MapPlugin)
         .add_systems(Startup, setup)
         .add_systems(
             Update, (
@@ -105,7 +111,7 @@ fn setup(
 ) {
     let texture = asset_server.load("textures/character/tw.png");
     let layout = TextureAtlasLayout::from_grid(
-        UVec2::splat(16), 6, 8, Some(UVec2 { x: 0, y: 1 }), None
+        UVec2::splat(TILE_SIZE), 6, 8, Some(UVec2 { x: 0, y: 1 }), None
     );
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
@@ -118,7 +124,7 @@ fn setup(
         Transform {
             translation: Vec3 {x: 0.0, y: 0.0 , z: -1.0},
             rotation: Quat::IDENTITY,
-            scale: Vec3::splat(8.0)
+            scale: Vec3::splat(GAME_SCALE)
         }
     ));
 
@@ -135,7 +141,7 @@ fn setup(
         Transform {
             translation: Vec3 {x: 0.0, y: 0.0 , z: 0.0},
             rotation: Quat::IDENTITY,
-            scale: Vec3::splat(8.0)
+            scale: Vec3::splat(GAME_SCALE)
         },
         animation_indices,
         AnimationTimer(Timer::from_seconds(0.2, TimerMode::Repeating)),
