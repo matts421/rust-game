@@ -41,6 +41,8 @@ fn setup(
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
     
     let map = create_default_map();
+    let scale = (TILE_SIZE as f32) * GAME_SCALE;
+
     for i in 1..map.len() {
         for j in 1..map[i].len() {
             commands.spawn(
@@ -53,7 +55,7 @@ fn setup(
                         },
                     ),
                     Transform {
-                        translation: Vec3 {x: (j * 16 * 8) as f32, y: (i * 16 * 8) as f32, z: -0.5},
+                        translation: Vec3 {x: (j as f32) * scale, y: (i as f32) * scale, z: -0.5},
                         rotation: Quat::IDENTITY,
                         scale: Vec3::splat(GAME_SCALE)
                     },
