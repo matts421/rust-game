@@ -37,7 +37,7 @@ fn pad_sprites(
 
 fn main() {
     pad_sprites(
-        "assets/textures/character/tw.png",
-        16, 16, 0, 1
+        "assets/textures/tileset.png",
+        16, 16, 1, 1
     );
 }
