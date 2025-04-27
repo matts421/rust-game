@@ -1,11 +1,18 @@
 use std::io::{self, Write, Read};
 use std::net::{TcpStream, UdpSocket};
+use std::net::Ipv4Addr;
 
 use rust_game::DISCOVERY_PORT;
 use rust_game::ECHO_PORT;
+use rust_game::MULTICAST_IP;
 
 fn discover() -> std::io::Result<Option<String>> {
     let socket = UdpSocket::bind(format!("0.0.0.0:{}", DISCOVERY_PORT))?;
+    
+    socket.join_multicast_v4(
+        &MULTICAST_IP.parse().unwrap(),
+        &Ipv4Addr::UNSPECIFIED,
+    )?;
     let mut buf = [0; 1024];
     
     loop {

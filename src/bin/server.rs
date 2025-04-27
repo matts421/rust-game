@@ -4,6 +4,7 @@ use std::net::{TcpListener, TcpStream, UdpSocket};
 
 use rust_game::DISCOVERY_PORT;
 use rust_game::ECHO_PORT;
+use rust_game::MULTICAST_IP;
 
 fn handle_client(mut stream: TcpStream) {
     let mut buffer = [0; 512];
@@ -35,10 +36,9 @@ fn broadcast(socket: &UdpSocket) -> std::io::Result<()> {
     let message_bytes = message.as_bytes();
 
     loop {
-        socket.send_to(message_bytes, format!("255.255.255.255:{}", DISCOVERY_PORT))?;
-        thread::sleep(Duration::from_secs(2)); // broadcast every 2s
+        socket.send_to(message_bytes, format!("{}:{}", MULTICAST_IP, DISCOVERY_PORT))?;
+        thread::sleep(Duration::from_secs(2));
     }
-    // todo: cancel when received a connection
 }
 
 fn main() -> std::io::Result<()> {
