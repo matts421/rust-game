@@ -5,7 +5,7 @@ edition = "2021"
 default-run = "rust-game"
 
 [dependencies]
-bevy = { version = "0.15.3", features = ["dynamic_linking"] }
+bevy = { version = "0.16.0", features = ["dynamic_linking"] }
 image = "0.25.6"
 dotenvy = "0.15"
 

@@ -1,21 +1,28 @@
 mod map;
-mod constants;
+mod ui;
+mod shared;
 
-use bevy::prelude::*;
 use dotenvy::dotenv;
+// use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 
+use crate::shared::*;
 use crate::map::MapPlugin;
-use crate::constants::{GAME_SCALE, TILE_SIZE};
-
-const PLAYER_SPEED: f32 = 300.0;
+use crate::ui::UIPlugin;
 
 fn main() {
     dotenv().ok();
     
     App::new()
-        .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
+        .add_plugins((
+            DefaultPlugins.set(ImagePlugin::default_nearest()),
+            // LogDiagnosticsPlugin::default(), // Adds frame time, FPS and frame count diagnostics.
+            // FrameTimeDiagnosticsPlugin::default(), // Adds an entity count diagnostic.
+        ))
         .add_plugins(MapPlugin)
+        .add_plugins(UIPlugin)
         .add_systems(Startup, setup)
+
+        .add_systems(OnEnter(GameState::Playing), setup_game)
         .add_systems(
             Update, (
                 animate_sprite,
@@ -23,7 +30,7 @@ fn main() {
                 movement_system,
                 update_camera,
                 quit
-            ))
+            ).run_if(in_state(GameState::Playing)))
         .run();
 }
 
@@ -86,8 +93,8 @@ fn update_camera(
     player_query: Query<&Transform, With<Player>>,
     mut camera_query: Query<&mut Transform, (With<Camera>, Without<Player>)>,
 ) {
-    if let Ok(player_transform) = player_query.get_single() {
-        if let Ok(mut camera_transform) = camera_query.get_single_mut() {
+    if let Ok(player_transform) = player_query.single() {
+        if let Ok(mut camera_transform) = camera_query.single_mut() {
             let mut new_pos = player_transform.translation;
             new_pos.z = camera_transform.translation.z;
             camera_transform.translation = new_pos;
@@ -100,11 +107,15 @@ fn quit(
     mut exit: EventWriter<AppExit>
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
-        exit.send(AppExit::Success);
+        exit.write(AppExit::Success);
     }
 }
 
-fn setup(
+fn setup(mut commands: Commands) {
+    commands.spawn(Camera2d);
+}
+
+fn setup_game(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
@@ -116,8 +127,6 @@ fn setup(
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
 
     let animation_indices = AnimationIndices { curr: 0, first: 0, last: 5, offset: 0 };
-
-    commands.spawn(Camera2d);
 
     commands.spawn((
         Sprite::from_image(asset_server.load("textures/bg.png")),

@@ -1,5 +1,4 @@
-use bevy::prelude::*;
-use crate::constants::{GAME_SCALE, TILE_SIZE};
+use crate::shared::*;
 
 type Map = Vec<Vec<u8>>;
 
@@ -25,7 +24,7 @@ pub struct MapPlugin;
 
 impl Plugin for MapPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup);
+        app.add_systems(OnEnter(GameState::Playing), setup);
     }
 }
 
